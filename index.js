@@ -26,10 +26,7 @@ app.post('/api/surat', (req, res) => {
 
     const result = Joi.validate( req.body, schema);
 
-    if (result.error) {
-        res.status(404).send(result.error.details[0].message);
-        return;
-    };
+    if (result.error) return res.status(404).send(result.error.details[0].message);
 
     const surat = {
         id: surats.length + 1,
@@ -46,25 +43,37 @@ app.get('/api/surat/cari', (req, res) => {
 
 app.get('/api/surat/:suratID', (req, res) => {
     const surat = surats.find( c => c.id === parseInt(req.params.suratID));
-    if(!surat) res.status(404).send('The page you are looking for not found');
+    
+    if( !surat ) return res.status(404).send('The page you are looking for was not found');
+    
     res.send(surat);
 });
 
 app.put('/api/surat/:suratID', (req, res) => {
-
+    
     const surat = surats.find( c => c.id === parseInt(req.params.suratID));
-    if (!surat) res.status(404).send('The page you are looking for not found');
+
+    if (!surat) return res.status(404).send('The page you are looking for was not found');
   
     const { error } = validateSurat(req.body);
 
     if (error) {
-        res.status(400).send(error.details[0].message);
-        return;
+        return res.status(400).send(error.details[0].message);
     }
 
     surat.name = req.body.name;
     res.send(surat);
+});
 
+app.delete('/api/surat/:suratID', (req, res) => {
+    const surat = surats.find( c => c.id === parseInt(req.params.suratID));
+
+    if (!surat) return res.status(404).send('The course with the given ID was not found');
+
+    const index = surats.indexOf(surat);
+    surats.splice(index, 1);
+
+    res.send(surat);
 });
 
 app.get('/api/surat/:suratID/ayat/:ayatID', (req, res) => {
